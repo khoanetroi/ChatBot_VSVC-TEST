@@ -3,6 +3,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const messageInput = document.getElementById('messageInput');
     const sendBtn = document.getElementById('sendBtn');
     const clearChatBtn = document.getElementById('clearChatBtn');
+    const micBtn = document.getElementById('micBtn');
 
     // Tự động thay đổi chiều cao của textarea
     messageInput.addEventListener('input', function() {
@@ -223,4 +224,66 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Khởi tạo trạng thái nút send
     sendBtn.setAttribute('disabled', 'true');
+
+    // ==========================================
+    // TÍCH HỢP GIỌNG NÓI (VOICE INPUT)
+    // ==========================================
+
+    // Speech Recognition
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    let recognition;
+    let isRecording = false;
+
+    if (SpeechRecognition) {
+        recognition = new SpeechRecognition();
+        recognition.lang = 'vi-VN';
+        recognition.interimResults = true;
+        recognition.continuous = false;
+
+        recognition.onstart = () => {
+            isRecording = true;
+            micBtn.classList.add('recording');
+            messageInput.placeholder = "Đang nghe...";
+        };
+
+        recognition.onresult = (event) => {
+            let transcript = '';
+            for (let i = event.resultIndex; i < event.results.length; i++) {
+                transcript += event.results[i][0].transcript;
+            }
+            messageInput.value = transcript;
+            messageInput.style.height = 'auto';
+            messageInput.style.height = (messageInput.scrollHeight) + 'px';
+            sendBtn.removeAttribute('disabled');
+        };
+
+        recognition.onend = () => {
+            isRecording = false;
+            micBtn.classList.remove('recording');
+            messageInput.placeholder = "Nhập tin nhắn hoặc dùng giọng nói...";
+            // Tự động gửi nếu dừng nói
+            if (messageInput.value.trim().length > 0) {
+                 handleSendMessage();
+            }
+        };
+
+        recognition.onerror = (event) => {
+            console.error("Lỗi nhận diện giọng nói:", event.error);
+            isRecording = false;
+            micBtn.classList.remove('recording');
+            messageInput.placeholder = "Nhập tin nhắn hoặc dùng giọng nói...";
+        };
+
+        micBtn.addEventListener('click', () => {
+            if (isRecording) {
+                recognition.stop();
+            } else {
+                messageInput.value = ''; // xóa text cũ
+                recognition.start();
+            }
+        });
+    } else {
+        micBtn.style.display = 'none';
+        console.warn("Trình duyệt không hỗ trợ nhận diện giọng nói.");
+    }
 });
