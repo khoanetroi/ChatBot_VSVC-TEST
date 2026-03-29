@@ -418,3 +418,48 @@ body {
         border: none;
     }
 }
+
+/* Suggested Questions UI */
+.suggestions-container {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 6px;
+    margin-bottom: 12px;
+    align-items: flex-start;
+    padding-left: 48px; /* Offset cho bằng với bong bóng chat (36px avatar + 12px gap) */
+    animation: fadeIn 0.4s ease forwards;
+}
+
+.suggestion-btn {
+    background: rgba(24, 24, 27, 0.6);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 10px 16px;
+    color: var(--text-primary);
+    font-size: 0.9rem;
+    text-align: left;
+    cursor: pointer;
+    transition: all var(--transition-speed);
+    max-width: 90%;
+    line-height: 1.4;
+    font-family: inherit;
+}
+
+.suggestion-btn:hover {
+    background: rgba(59, 130, 246, 0.15); /* Light blue accent */
+    border-color: var(--accent-primary);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+@media (max-width: 768px) {
+    .suggestions-container {
+        padding-left: 0;
+        align-items: stretch;
+    }
+    .suggestion-btn {
+        max-width: 100%;
+    }
+}
+

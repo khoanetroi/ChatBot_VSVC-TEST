@@ -1,0 +1,9 @@
+event:conversation.chat.created
+data:{"id":"7622667521866629173","conversation_id":"7622667521866596405","bot_id":"7622191921179820085","created_at":1774790609,"last_error":{"code":0,"msg":""},"status":"created","usage":{"token_count":0,"output_count":0,"input_count":0},"section_id":"7622667521866596405"}
+
+event:conversation.chat.in_progress
+data:{"id":"7622667521866629173","conversation_id":"7622667521866596405","bot_id":"7622191921179820085","created_at":1774790609,"last_error":{"code":0,"msg":""},"status":"in_progress","usage":{"token_count":0,"output_count":0,"input_count":0},"section_id":"7622667521866596405","inserted_additional_messages":[{"id":"7622667521866612789"}]}
+
+event:conversation.chat.failed
+data:{"id":"7622667521866629173","conversation_id":"7622667521866596405","bot_id":"7622191921179820085","created_at":1774790609,"failed_at":1774790609,"last_error":{"code":4011,"msg":"Your CozeToken balance is insufficient to complete this operation. Please recharge your account to ensure uninterrupted service."},"status":"failed","usage":{"token_count":0,"output_count":0,"input_count":0},"section_id":"7622667521866596405"}
+

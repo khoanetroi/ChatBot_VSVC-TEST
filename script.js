@@ -5,6 +5,61 @@ document.addEventListener('DOMContentLoaded', () => {
     const clearChatBtn = document.getElementById('clearChatBtn');
     const micBtn = document.getElementById('micBtn');
 
+    // Danh sách câu hỏi gợi ý theo lĩnh vực tuyển sinh
+    const SUGGESTED_QUESTIONS = [
+        "Cho mình biết các ngành nghề đang đào tạo tại trường?",
+        "Thời gian đào tạo cho mỗi ngành nghề là bao lâu?",
+        "Điều kiện xét tuyển vào trường được quy định như thế nào?",
+        "Trường có hỗ trợ thực tập, việc làm cho sinh viên sau khi tốt nghiệp không?",
+        "Mức học phí của trường hiện nay là bao nhiêu?",
+        "Hồ sơ đăng ký xét tuyển bao gồm những giấy tờ gì?",
+        "Trường có ký túc xá cho sinh viên ở xa hay không?",
+        "Sinh viên tốt nghiệp tại trường sẽ được cấp bằng cấp gì?",
+        "Học ngành Cơ điện tử sau này sẽ làm những công việc chuyên môn gì?",
+        "Thủ tục miễn giảm học phí được hướng dẫn như thế nào?"
+    ];
+
+    function getRandomSuggestions(count) {
+        const shuffled = [...SUGGESTED_QUESTIONS].sort(() => 0.5 - Math.random());
+        return shuffled.slice(0, count);
+    }
+
+    function showSuggestions(dynamicQuestions = null) {
+        removeSuggestions(); // Xóa gợi ý cũ
+
+        const container = document.createElement('div');
+        container.className = 'suggestions-container';
+        container.id = 'suggestionsContainer';
+
+        let questions = [];
+        if (dynamicQuestions && dynamicQuestions.length > 0) {
+            questions = dynamicQuestions.slice(0, 3);
+        } else {
+            questions = getRandomSuggestions(3);
+        }
+
+        questions.forEach(q => {
+            const btn = document.createElement('button');
+            btn.className = 'suggestion-btn';
+            btn.textContent = q;
+            btn.onclick = () => {
+                messageInput.value = q;
+                handleSendMessage();
+            };
+            container.appendChild(btn);
+        });
+
+        chatBox.appendChild(container);
+        chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    function removeSuggestions() {
+        const container = document.getElementById('suggestionsContainer');
+        if (container) {
+            container.remove();
+        }
+    }
+
     // Tự động thay đổi chiều cao của textarea
     messageInput.addEventListener('input', function() {
         this.style.height = 'auto';
@@ -32,6 +87,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const text = messageInput.value.trim();
         if (!text) return;
 
+        // Ẩn bảng gợi ý ngay khi người dùng bắt đầu gửi tin
+        removeSuggestions();
+
         // Tắt mic nếu đang bật
         if (window.isRecordingMic) {
             window.isExplicitlyStopped = true;
@@ -50,15 +108,23 @@ document.addEventListener('DOMContentLoaded', () => {
         // Hiển thị trạng thái "đang gõ..."
         const typingId = showTypingIndicator();
 
-        // Chờ kết quả từ API (Gọi hàm giả lập)
+        // Chờ kết quả từ API
         try {
-            const apiResponse = await callBotAPI(text);
+            const result = await callBotAPI(text);
             removeTypingIndicator(typingId);
-            appendMessage('bot', apiResponse);
+            appendMessage('bot', result.reply);
+            
+            // Ưu tiên hiện các câu hỏi do bot tự nghĩ ra, nếu không có thì fallback hiện random mặc định
+            if (result.suggestions && result.suggestions.length > 0) {
+                showSuggestions(result.suggestions);
+            } else {
+                showSuggestions();
+            }
         } catch (error) {
             removeTypingIndicator(typingId);
             appendMessage('bot', 'Lỗi kết nối API. Vui lòng thử lại sau.');
             console.error('API Error:', error);
+            showSuggestions();
         }
     }
 
@@ -85,7 +151,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     auto_save_history: true,
                     additional_messages: [{
                         role: 'user',
-                        content: userMessage,
+                        // Trộn "lệnh ẩn" vào tin nhắn của người dùng để ép Bot phải tự nghĩ ra câu hỏi
+                        content: userMessage + "\n\n[LỆNH ẨN DÀNH CHO BOT: Ở cuối câu trả lời của bạn, hãy tạo ra 3 câu hỏi gợi ý ngắn gọn, sát với ngữ cảnh cuộc trò chuyện để người dùng có thể ấn hỏi tiếp. Format bắt buộc mỗi câu hỏi nằm trên 1 dòng mới và bắt đầu bằng chính xác chuỗi '///SUGGESTION: ']",
                         content_type: 'text'
                     }]
                 })
@@ -136,14 +203,32 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
             
-            return fullText || "Bot không có phản hồi nội dung chữ.";
+            // Xử lý tách câu hỏi gợi ý ra khỏi câu trả lời chung
+            let finalReply = fullText;
+            let dynamicSuggestions = [];
+            
+            if (finalReply.includes('///SUGGESTION:')) {
+                const parts = finalReply.split('///SUGGESTION:');
+                finalReply = parts[0].trim(); // Phần đầu tiên là nội dung trả lời thật của bot
+                
+                // Lấy ra các câu hỏi
+                for (let i = 1; i < parts.length; i++) {
+                    const sug = parts[i].split('\n')[0].trim(); // Lấy đúng 1 dòng
+                    if (sug) dynamicSuggestions.push(sug);
+                }
+            }
+            
+            return {
+                reply: finalReply || "Bot không có phản hồi nội dung chữ.",
+                suggestions: dynamicSuggestions
+            };
             
         } catch (error) {
             console.error("Coze API Error:", error);
             if (error.message === 'Failed to fetch') {
-                return "Lỗi cấu hình mạng (CORS). Bạn hãy cài Plugin 'Moesif Origin & CORS Changer' trên Chrome, bật ON lên để test ở máy tính nhé!";
+                return { reply: "Lỗi cấu hình mạng (CORS). Bạn hãy cài Plugin 'Moesif Origin & CORS Changer' trên Chrome, bật ON lên để test ở máy tính nhé!", suggestions: [] };
             }
-            return "Lỗi: " + error.message;
+            return { reply: "Lỗi: " + error.message, suggestions: [] };
         }
     }
 
@@ -226,6 +311,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const defaultMsg = chatBox.querySelector('.message:first-child').outerHTML;
             chatBox.innerHTML = defaultMsg;
             lucide.createIcons();
+            showSuggestions(); // Khởi tạo lại gợi ý
         }
     }
 
@@ -332,4 +418,10 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         console.warn("Trình duyệt không hỗ trợ nhận diện giọng nói.");
     }
+
+    // Khởi tạo các gợi ý ngay lần đầu tiên mở trang
+    setTimeout(() => {
+        showSuggestions();
+    }, 600);
 });
+
