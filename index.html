@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Chatbot Platform | API Testing</title>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- SVG Icons (Lucide) -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="app-background">
+        <!-- Decorative glowing orbs -->
+        <div class="glow-orb orb-1"></div>
+        <div class="glow-orb orb-2"></div>
+        <div class="glow-orb orb-3"></div>
+    </div>
+
+    <main class="chat-wrapper">
+        <div class="chat-container">
+            <!-- Header -->
+            <header class="chat-header">
+                <div class="header-info">
+                    <div class="bot-avatar">
+                        <i data-lucide="bot" class="bot-icon"></i>
+                        <div class="online-indicator"></div>
+                    </div>
+                    <div class="bot-details">
+                        <h1>ChatBot Test</h1>
+                    </div>
+                </div>
+                <div class="header-actions">
+                    <button class="icon-btn" title="Xóa lịch sử" id="clearChatBtn">
+                        <i data-lucide="trash-2"></i>
+                    </button>
+                </div>
+            </header>
+
+            <!-- Chat Area -->
+            <div class="chat-box" id="chatBox">
+                <!-- Welcome Message -->
+                <div class="message bot-message">
+                    <div class="message-avatar">
+                        <i data-lucide="bot"></i>
+                    </div>
+                    <div class="message-content">
+                        <p>Xin chào! Mình là Trợ lý ảo tư vấn tuyển sinh của Trường Cao đẳng Nghề Việt Nam - Singapore
+                            (VSVC). Mình có thể hỗ trợ thông tin gì cho bạn về các ngành học hoặc quy chế tuyển sinh ạ?
+                        </p>
+                        <span class="message-time">Vừa xong</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Input Area -->
+            <footer class="chat-footer">
+                <div class="input-container">
+                    <button class="icon-btn attach-btn" title="Attach file">
+                        <i data-lucide="paperclip"></i>
+                    </button>
+                    <textarea id="messageInput" placeholder="Nhập tin nhắn..." rows="1" autofocus></textarea>
+                    <button id="sendBtn" class="send-btn" title="Send message">
+                        <i data-lucide="send"></i>
+                    </button>
+                </div>
+                <div class="footer-note">
+                    Chuyên viên tư vấn ảo AI - VSVC
+                </div>
+            </footer>
+        </div>
+    </main>
+
+    <script src="script.js"></script>
+    <script>
+        // Khởi tạo icon Lucide
+        lucide.createIcons();
+    </script>
+</body>
+
+</html>
