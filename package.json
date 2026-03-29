@@ -1,0 +1,27 @@
+{
+  "name": "chatbot_vsvc-test",
+  "version": "1.0.0",
+  "description": "",
+  "main": "j2team_tts.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/khoanetroi/ChatBot_VSVC-TEST.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/khoanetroi/ChatBot_VSVC-TEST/issues"
+  },
+  "homepage": "https://github.com/khoanetroi/ChatBot_VSVC-TEST#readme",
+  "dependencies": {
+    "cors": "^2.8.6",
+    "edge-tts-universal": "^1.4.0",
+    "express": "^5.2.1",
+    "node-edge-tts": "^1.2.10"
+  }
+}
