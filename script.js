@@ -11,12 +11,12 @@ document.addEventListener('DOMContentLoaded', () => {
         "Thời gian đào tạo cho mỗi ngành nghề là bao lâu?",
         "Điều kiện xét tuyển vào trường được quy định như thế nào?",
         "Trường có hỗ trợ thực tập, việc làm cho sinh viên sau khi tốt nghiệp không?",
-        "Mức học phí của trường hiện nay là bao nhiêu?",
+        "Ngành Công nghệ Ô tô học những gì và cơ hội việc làm ra sao?",
         "Hồ sơ đăng ký xét tuyển bao gồm những giấy tờ gì?",
         "Trường có ký túc xá cho sinh viên ở xa hay không?",
         "Sinh viên tốt nghiệp tại trường sẽ được cấp bằng cấp gì?",
         "Học ngành Cơ điện tử sau này sẽ làm những công việc chuyên môn gì?",
-        "Thủ tục miễn giảm học phí được hướng dẫn như thế nào?"
+        "Trường đào tạo những ngành nào thuộc khối Công nghệ thông tin?"
     ];
 
     function getRandomSuggestions(count) {
