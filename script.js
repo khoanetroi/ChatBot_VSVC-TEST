@@ -61,10 +61,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Tự động thay đổi chiều cao của textarea
-    messageInput.addEventListener('input', function() {
+    messageInput.addEventListener('input', function () {
         this.style.height = 'auto';
         this.style.height = (this.scrollHeight) + 'px';
-        if(this.value.trim().length > 0) {
+        if (this.value.trim().length > 0) {
             sendBtn.removeAttribute('disabled');
         } else {
             sendBtn.setAttribute('disabled', 'true');
@@ -72,7 +72,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Enter để gửi tin nhắn
-    messageInput.addEventListener('keydown', function(e) {
+    messageInput.addEventListener('keydown', function (e) {
         if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();
             handleSendMessage();
@@ -93,7 +93,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Tắt mic nếu đang bật
         if (window.isRecordingMic) {
             window.isExplicitlyStopped = true;
-            try { window.recognitionObj.stop(); } catch(e) {}
+            try { window.recognitionObj.stop(); } catch (e) { }
         }
         window.finalTranscript = '';
 
@@ -113,7 +113,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const result = await callBotAPI(text);
             removeTypingIndicator(typingId);
             appendMessage('bot', result.reply);
-            
+
             // Ưu tiên hiện các câu hỏi do bot tự nghĩ ra, nếu không có thì fallback hiện random mặc định
             if (result.suggestions && result.suggestions.length > 0) {
                 showSuggestions(result.suggestions);
@@ -133,8 +133,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // ==========================================
     async function callBotAPI(userMessage) {
         const BOT_ID = '7622191921179820085';
-        const PAT = 'pat_GsZ8bzC5SvFzrcqorzGBkwZl2lbxnKeBhlLLEpptBBcppqrA7Oevaplgp5s5vCnU';
-        
+        const PAT = 'pat_29D6RA2KwNZ5qB37flIcLoxQW0KmYC3WdO9RTkFbflCPUEevRkyyE2heWRxQzf2W';
+
         try {
             // Sử dụng chế độ Streaming (stream: true) để nhận kết quả trực tiếp 
             // và tránh lỗi phân quyền (4100 invalid authentication) khi gọi API kiểm tra trạng thái
@@ -146,7 +146,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 },
                 body: JSON.stringify({
                     bot_id: BOT_ID,
-                    user_id: "user_web_" + Math.floor(Math.random() * 100000), 
+                    user_id: "user_web_" + Math.floor(Math.random() * 100000),
                     stream: true,
                     auto_save_history: true,
                     additional_messages: [{
@@ -157,11 +157,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     }]
                 })
             });
-            
+
             if (!chatRes.ok) {
                 throw new Error("Lỗi HTTP: " + chatRes.status);
             }
-            
+
             // Đọc dữ liệu stream từ bot trả về
             const reader = chatRes.body.getReader();
             const decoder = new TextDecoder("utf-8");
@@ -172,16 +172,16 @@ document.addEventListener('DOMContentLoaded', () => {
             while (true) {
                 const { value, done } = await reader.read();
                 if (done) break;
-                
+
                 chunkBuffer += decoder.decode(value, { stream: true });
                 const lines = chunkBuffer.split('\n');
-                
+
                 // Giữ lại dòng cuối cùng chưa hoàn thiện vào buffer
-                chunkBuffer = lines.pop(); 
-                
+                chunkBuffer = lines.pop();
+
                 for (const line of lines) {
                     if (line.trim() === '') continue;
-                    
+
                     if (line.startsWith('event:')) {
                         currentEvent = line.substring(6).trim();
                     } else if (line.startsWith('data:')) {
@@ -189,7 +189,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             try {
                                 const dataStr = line.substring(5).trim();
                                 if (dataStr === '[DONE]') continue;
-                                
+
                                 const dataObj = JSON.parse(dataStr);
                                 // Chỉ cộng nối các đoạn text thuộc phần trả lời chính của bot (answer)
                                 if (dataObj.type === 'answer') {
@@ -202,27 +202,27 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 }
             }
-            
+
             // Xử lý tách câu hỏi gợi ý ra khỏi câu trả lời chung
             let finalReply = fullText;
             let dynamicSuggestions = [];
-            
+
             if (finalReply.includes('///SUGGESTION:')) {
                 const parts = finalReply.split('///SUGGESTION:');
                 finalReply = parts[0].trim(); // Phần đầu tiên là nội dung trả lời thật của bot
-                
+
                 // Lấy ra các câu hỏi
                 for (let i = 1; i < parts.length; i++) {
                     const sug = parts[i].split('\n')[0].trim(); // Lấy đúng 1 dòng
                     if (sug) dynamicSuggestions.push(sug);
                 }
             }
-            
+
             return {
                 reply: finalReply || "Bot không có phản hồi nội dung chữ.",
                 suggestions: dynamicSuggestions
             };
-            
+
         } catch (error) {
             console.error("Coze API Error:", error);
             if (error.message === 'Failed to fetch') {
@@ -236,21 +236,21 @@ document.addEventListener('DOMContentLoaded', () => {
     function appendMessage(sender, text) {
         const messageDiv = document.createElement('div');
         messageDiv.className = `message ${sender}-message`;
-        
+
         const avatarDiv = document.createElement('div');
         avatarDiv.className = 'message-avatar';
         avatarDiv.innerHTML = sender === 'bot' ? '<i data-lucide="bot"></i>' : '<i data-lucide="user"></i>';
 
         const contentDiv = document.createElement('div');
         contentDiv.className = 'message-content';
-        
+
         const textP = document.createElement('p');
         // Xử lý Markdown cơ bản từ bot (In đậm, in nghiêng, xuống dòng)
         let formattedText = text
             .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') // In đậm
             .replace(/\*(.*?)\*/g, '<em>$1</em>')             // In nghiêng
             .replace(/\n/g, '<br>');                          // Xuống dòng
-            
+
         // Sử dụng innerHTML để render các thẻ <strong>, <br> thay vì in ra text raw
         textP.innerHTML = formattedText;
 
@@ -271,7 +271,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         chatBox.appendChild(messageDiv);
         chatBox.scrollTop = chatBox.scrollHeight;
-        
+
         // Cập nhật lại icon cho bubble mới add
         lucide.createIcons();
     }
@@ -282,7 +282,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const messageDiv = document.createElement('div');
         messageDiv.className = 'message bot-message';
         messageDiv.id = id;
-        
+
         messageDiv.innerHTML = `
             <div class="message-avatar">
                 <i data-lucide="bot"></i>
@@ -293,7 +293,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div class="typing-dot"></div>
             </div>
         `;
-        
+
         chatBox.appendChild(messageDiv);
         chatBox.scrollTop = chatBox.scrollHeight;
         lucide.createIcons();
@@ -307,7 +307,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Nút dọn dẹp chat
     function clearChat() {
-        if(confirm("Bạn có chắc chắn muốn xóa toàn bộ lịch sử cuộc trò chuyện?")) {
+        if (confirm("Bạn có chắc chắn muốn xóa toàn bộ lịch sử cuộc trò chuyện?")) {
             const defaultMsg = chatBox.querySelector('.message:first-child').outerHTML;
             chatBox.innerHTML = defaultMsg;
             lucide.createIcons();
@@ -349,12 +349,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     interimTranscript += event.results[i][0].transcript;
                 }
             }
-            
+
             messageInput.value = window.finalTranscript + interimTranscript;
             messageInput.style.height = 'auto';
             messageInput.style.height = (messageInput.scrollHeight) + 'px';
-            
-            if(messageInput.value.trim().length > 0) {
+
+            if (messageInput.value.trim().length > 0) {
                 sendBtn.removeAttribute('disabled');
             }
         };
@@ -364,7 +364,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Tự động bật lại nếu chưa bấm dừng mic (do continuous=false tự ngắt khi ngập ngừng)
                 try {
                     recognition.start();
-                } catch(e) {
+                } catch (e) {
                     window.isRecordingMic = false;
                     micBtn.classList.remove('recording');
                     messageInput.placeholder = "Nhập tin nhắn hoặc dùng giọng nói...";
@@ -384,7 +384,7 @@ document.addEventListener('DOMContentLoaded', () => {
             window.isExplicitlyStopped = true;
             window.isRecordingMic = false;
             micBtn.classList.remove('recording');
-            
+
             if (event.error === 'not-allowed') {
                 alert("Bạn cần cấp quyền truy cập Mic trong biểu tượng ổ khóa trình duyệt!");
             } else if (event.error !== 'aborted') {
@@ -396,7 +396,7 @@ document.addEventListener('DOMContentLoaded', () => {
         micBtn.addEventListener('click', () => {
             if (window.isRecordingMic) {
                 window.isExplicitlyStopped = true;
-                try { recognition.stop(); } catch(e) {}
+                try { recognition.stop(); } catch (e) { }
             } else {
                 window.isExplicitlyStopped = false;
                 // Giữ lại nội dung đang gõ thay vì xóa sạch
@@ -406,7 +406,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
                 try {
                     recognition.start();
-                } catch(e) {
+                } catch (e) {
                     console.error("Lỗi khi bật mic:", e);
                     alert("System Error khi bật Mic: " + e.message);
                 }
