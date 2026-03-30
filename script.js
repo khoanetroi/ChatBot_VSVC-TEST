@@ -121,7 +121,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const result = await callBotAPI(text);
             removeTypingIndicator(typingId);
             appendMessage('bot', result.reply);
-            
+
             // Đọc tin nhắn bằng giọng nói (Text To Speech)
             speakText(result.reply);
 
@@ -143,8 +143,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // KHU VỰC DÀNH CHO BẠN (Tích hợp API ở đây)
     // ==========================================
     async function callBotAPI(userMessage) {
-        const BOT_ID = '7622191921179820085';
-        const PAT = 'pat_29D6RA2KwNZ5qB37flIcLoxQW0KmYC3WdO9RTkFbflCPUEevRkyyE2heWRxQzf2W';
+        const BOT_ID = '7622802208627703813';
+        const PAT = 'pat_Pwd7a9XcMpZqhXjt4knYM1gT0xbTvEMOgHRK6HzV9eS8x3pl6t7ATeG22VO50Q4Z';
 
         try {
             // Sử dụng chế độ Streaming (stream: true) để nhận kết quả trực tiếp 
