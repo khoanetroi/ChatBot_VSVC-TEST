@@ -84,6 +84,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Xử lý gửi tin nhắn
     async function handleSendMessage() {
+        // Mở khóa Audio (Autoplay Policy) ngay khi user tương tác đồng bộ
+        if (!window.audioUnlocked) {
+            window.currentAudio = new Audio('data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA');
+            window.currentAudio.play().then(() => {
+                window.audioUnlocked = true;
+            }).catch(() => {});
+        }
+
         const text = messageInput.value.trim();
         if (!text) return;
 
@@ -113,6 +121,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const result = await callBotAPI(text);
             removeTypingIndicator(typingId);
             appendMessage('bot', result.reply);
+
 
             // Ưu tiên hiện các câu hỏi do bot tự nghĩ ra, nếu không có thì fallback hiện random mặc định
             if (result.suggestions && result.suggestions.length > 0) {
@@ -417,6 +426,76 @@ document.addEventListener('DOMContentLoaded', () => {
             alert("Trình duyệt của bạn (hoặc ứng dụng đang mở link) KHÔNG hỗ trợ chức năng nhận diện giọng nói. Vui lòng copy link ra mở bằng Google Chrome hoặc Safari nhé!");
         });
         console.warn("Trình duyệt không hỗ trợ nhận diện giọng nói.");
+    }
+
+    // ==========================================
+    // TÍCH HỢP ĐỌC VĂN BẢN (TEXT TO SPEECH) QUA J2TEAM API
+    // ==========================================
+    window.audioQueue = [];
+    window.currentAudio = null;
+
+    function splitTextToChunks(text, maxLength) {
+        // Tách câu theo dấu ngắt câu hoặc dòng mới
+        const sentences = text.match(/[^.!?\n]+[.!?\n]*/g) || [text];
+        let chunks = [];
+        let currentChunk = "";
+        
+        sentences.forEach(sentence => {
+            if (sentence.length > maxLength) {
+                let words = sentence.split(' ');
+                words.forEach(word => {
+                    if (currentChunk.length + word.length + 1 > maxLength) {
+                        if (currentChunk.trim()) chunks.push(currentChunk.trim());
+                        currentChunk = word + " ";
+                    } else {
+                        currentChunk += word + " ";
+                    }
+                });
+            } else if (currentChunk.length + sentence.length > maxLength) {
+                if (currentChunk.trim()) chunks.push(currentChunk.trim());
+                currentChunk = sentence;
+            } else {
+                currentChunk += sentence;
+            }
+        });
+        if (currentChunk.trim()) chunks.push(currentChunk.trim());
+        return chunks;
+    }
+
+    function speakText(text) {
+        // Dừng âm thanh cũ
+        if (window.currentAudio) {
+            window.currentAudio.pause();
+            window.currentAudio.currentTime = 0;
+        }
+        window.audioQueue = []; // Xóa hàng đợi cũ
+
+        // Xóa bỏ các ký tự markdown như *, _ để đọc tự nhiên hơn
+        const cleanText = text.replace(/[*_#`]/g, '').trim();
+        
+        // Chia nhỏ để API chạy mượt (giới hạn 500 ký tự cho an toàn)
+        const chunks = splitTextToChunks(cleanText, 500);
+        window.audioQueue = chunks;
+        playNextAudio();
+    }
+    
+    function playNextAudio() {
+        if (!window.audioQueue || window.audioQueue.length === 0) return;
+        
+        const chunk = window.audioQueue.shift();
+        
+        // Tự động nhận diện môi trường: Nếu chạy local thì qua cổng 3000, nếu trên Vercel thì dùng đường dẫn tương đối
+        const isLocal = window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost';
+        const baseUrl = isLocal ? 'http://localhost:3000' : '';
+        const url = `${baseUrl}/api/tts?text=${encodeURIComponent(chunk)}&voice=vi-VN-HoaiMyNeural`;
+        
+        window.currentAudio = new Audio(url);
+        window.currentAudio.onended = playNextAudio; 
+        window.currentAudio.play().catch(e => {
+            console.error("Lỗi phát audio:", e);
+            // Thử tiếp đoạn kế tiếp nếu lỗi
+            playNextAudio();
+        });
     }
 
     // Khởi tạo các gợi ý ngay lần đầu tiên mở trang
