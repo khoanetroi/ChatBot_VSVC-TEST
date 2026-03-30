@@ -144,7 +144,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // ==========================================
     async function callBotAPI(userMessage) {
         const BOT_ID = '7622802208627703813';
-        const PAT = 'pat_Pwd7a9XcMpZqhXjt4knYM1gT0xbTvEMOgHRK6HzV9eS8x3pl6t7ATeG22VO50Q4Z';
+        const PAT = 'pat_LQNQk50H91RvbKJG9ulNzYxtme1tlLinurcEQVdV9e6L06KVJCBaNMdeUv10iMaw';
 
         try {
             // Sử dụng chế độ Streaming (stream: true) để nhận kết quả trực tiếp 
