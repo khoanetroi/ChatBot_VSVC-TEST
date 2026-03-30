@@ -121,7 +121,9 @@ document.addEventListener('DOMContentLoaded', () => {
             const result = await callBotAPI(text);
             removeTypingIndicator(typingId);
             appendMessage('bot', result.reply);
-
+            
+            // Đọc tin nhắn bằng giọng nói (Text To Speech)
+            speakText(result.reply);
 
             // Ưu tiên hiện các câu hỏi do bot tự nghĩ ra, nếu không có thì fallback hiện random mặc định
             if (result.suggestions && result.suggestions.length > 0) {
