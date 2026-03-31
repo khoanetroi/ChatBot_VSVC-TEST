@@ -143,8 +143,19 @@ document.addEventListener('DOMContentLoaded', () => {
     // KHU VỰC DÀNH CHO BẠN (Tích hợp API ở đây)
     // ==========================================
     async function callBotAPI(userMessage) {
-        const BOT_ID = '7622802208627703813';
-        const PAT = 'pat_LQNQk50H91RvbKJG9ulNzYxtme1tlLinurcEQVdV9e6L06KVJCBaNMdeUv10iMaw';
+        let BOT_ID = '';
+        let PAT = '';
+        try {
+            const isLocal = window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost';
+            const baseUrl = isLocal ? 'http://localhost:3000' : '';
+            const configRes = await fetch(`${baseUrl}/api/config`);
+            const configData = await configRes.json();
+            BOT_ID = configData.BOT_ID;
+            PAT = configData.PAT;
+        } catch (e) {
+            console.error("Không thể lấy cấu hình API từ server:", e);
+            throw new Error("Lỗi cấu hình hệ thống");
+        }
 
         try {
             // Sử dụng chế độ Streaming (stream: true) để nhận kết quả trực tiếp 

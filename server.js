@@ -1,11 +1,19 @@
 const express = require('express');
 const cors = require('cors');
+require('dotenv').config();
 const { Communicate } = require('edge-tts-universal');
 
 const app = express();
 const PORT = 3000;
 
 app.use(cors()); // Allow requests from any origin
+
+app.get('/api/config', (req, res) => {
+    res.json({
+        BOT_ID: process.env.COZE_BOT_ID,
+        PAT: process.env.COZE_PAT
+    });
+});
 
 app.get('/api/tts', async (req, res) => {
     try {
